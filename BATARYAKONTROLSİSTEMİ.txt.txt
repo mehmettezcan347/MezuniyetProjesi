@@ -1,0 +1,66 @@
+include <LiquidCrystal_I2C.h>
+
+#include <Wire.h>
+
+LiquidCrystal_I2C lcdekranim(0x27,16,2);
+int bataryaseviye  = A0;   
+int bataryaRlekontrol = 9;
+int BKS;
+void setup() 
+{
+  Serial.begin(2400);
+  lcdekranim.init();
+  lcdekranim.backlight();
+  lcdekranim.setCursor(0,0);
+  lcdekranim.print("ANKUZEF-21452578");
+  lcdekranim.setCursor(0,1);
+  lcdekranim.print("Mehmet TEZCAN");
+delay(2000);
+  lcdekranim.clear();
+
+  pinMode(bataryaseviye, INPUT);
+  pinMode(bataryaRlekontrol, OUTPUT);
+  lcdekranim.init();
+  lcdekranim.backlight();
+  lcdekranim.setCursor(0,0);
+  BKS = 0;
+}
+
+void loop()
+{
+ int bataryaVoltaj = analogRead(bataryaseviye);
+  float bataryaseviye = (5.0/1023)*bataryaVoltaj;
+  bataryaseviye  = bataryaseviye*3.005;
+  lcdekranim.setCursor(0,0);
+ lcdekranim.print("BATT V= ");
+   lcdekranim.print(bataryaseviye);
+ 
+
+
+ lcdekranim.setCursor(0,1);
+
+  lcdekranim.print("%= ");
+  
+  lcdekranim.print((bataryaseviye*100)/15);
+   if(BKS == 0 && bataryaseviye <13.4){
+    digitalWrite(bataryaRlekontrol, LOW);
+    }
+
+    //-----BKS 0, BATARYA DOLU 13.4V -----
+    if(BKS == 0 && bataryaseviye >13.4){
+    digitalWrite(bataryaRlekontrol, HIGH);
+    BKS = 1;
+    }
+    //-----BKS 1, BATARYA 13.4v ----------
+    if(BKS == 1 && bataryaseviye <13.4){
+    digitalWrite(bataryaRlekontrol, HIGH);
+    BKS = 2;
+    }
+
+    //-----BKS 2, BATARYA 9v--------------
+    if(BKS == 2 && bataryaseviye <9){
+    digitalWrite(bataryaRlekontrol, LOW);
+    BKS = 0;
+    }
+
+}
